@@ -1,0 +1,19 @@
+SELECT 
+    DATE_FORMAT(o.OrderedAt, '%Y-%m-01') AS OrderMonth,
+    COUNT(CASE WHEN o.UserID != 'non-member' THEN 1 END) AS MemberOrderCount,
+    COUNT(CASE WHEN o.UserID = 'non-member' THEN 1 END) AS NonMemberOrderCount,
+    COUNT(*) AS TotalOrderCount,
+    COALESCE((COUNT(CASE WHEN o.UserID != 'non-member' THEN 1 END) * 100.0 / COUNT(*)), 0) AS MemberOrderPercentage,
+    SUM(o.TotalAmount) AS TotalSales,
+    AVG(o.TotalAmount) AS AverageTotalSales,
+    AVG(CASE WHEN o.UserID != 'non-member' THEN o.TotalAmount END) AS AverageTotalSalesForMembers,
+    AVG(CASE WHEN o.UserID = 'non-member' THEN o.TotalAmount END) AS AverageTotalSalesForNonMembers
+FROM 
+    Orders o
+WHERE 
+    o.ShopID = 'db7ff7b0-89c4-453a-99a4-f2492b8a2533'
+    AND o.OrderedAt BETWEEN '2024-06-01' AND '2024-07-01'
+    AND o.Type = 'shop'
+    AND o.Refunded = 'false'
+GROUP BY 
+    DATE_FORMAT(o.OrderedAt, '%Y-%m-01');
